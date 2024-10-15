@@ -9,6 +9,7 @@ program
 
 const options = program.opts();
 
+
 if (!fs.existsSync(options.input)) {    
     console.error("Error: Cannot find input file");
     process.exit(1); 
@@ -26,16 +27,27 @@ let parsedData;
 try {
     parsedData = JSON.parse(data);
 } catch (error) {
-    console.error('Error: Input file is not valid JSON');
+    console.error('Error: Input file is not valid JSON');    
     process.exit(1);
 }
 
-const resultLines = parsedData.map(entry => {
-    return `${entry.exchangedate}: ${entry.rate}`;
+
+const selectedCategories = {};
+const categoriesToFind = ["Доходи, усього", "Витрати, усього"];
+
+parsedData.forEach(entry => {
+    if (categoriesToFind.includes(entry.category)) {
+        selectedCategories[entry.category] = entry.value; 
+    }
 });
 
-if (options.display) {
-    resultLines.forEach(line => console.log(line));
+const resultLines = Object.entries(selectedCategories).map(([category, value]) => {
+    return `${category}:${value}`;
+});
+
+
+if (options.display) {   
+     resultLines.forEach(line => console.log(line));
 }
 
 if (options.output) {
