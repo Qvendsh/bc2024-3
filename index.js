@@ -1,12 +1,12 @@
 const fs = require('fs');
 const { program } = require('commander');
 
+
 program    
     .requiredOption('-i, --input <path>', 'input JSON file')
     .option('-o, --output <path>', 'output file', 'output.txt') 
     .option('-d, --display', 'display result in console')
     .parse(process.argv);
-
 const options = program.opts();
 
 if (!fs.existsSync(options.input)) {    
@@ -30,25 +30,18 @@ try {
     process.exit(1);
 }
 
-const selectedCategories = {};
-const categoriesToFind = ["Доходи, усього", "Витрати, усього"];
-
+// Вибір даних для доходів та витрат
+const resultLines = [];
 parsedData.forEach(entry => {
-    if (categoriesToFind.includes(entry.category)) {
-        selectedCategories[entry.category] = entry.value; 
+    if (entry.txt === "Доходи, усього" || entry.txt === "Витрати, усього") {
+        resultLines.push(`${entry.txt}:${entry.value}`);
     }
 });
 
-const resultLines = Object.entries(selectedCategories).map(([category, value]) => {
-    return `${category}:${value}`;
-});
-
+// Вивід результатів
 if (options.display) {   
     resultLines.forEach(line => console.log(line));
 }
 
-try {
-    fs.writeFileSync(options.output, resultLines.join('\n'), 'utf-8');
-} catch (error) {
-    console.error('Error: Unable to write to output file');
-}
+// Запис результатів у файл
+fs.writeFileSync(options.output, resultLines.join('\n'), 'utf-8');
